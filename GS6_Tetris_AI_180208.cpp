@@ -1,4 +1,3 @@
-// test
 #if 1
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +17,7 @@ typedef struct strct_block_info {
 
 
 block_info bval = { 0, 0, 0, 4, -1 } ;
-unsigned int is_score, target_score, game = 0, image_x = 680, image_y = 140, board [ 30 ] [ 16 ],
+unsigned int is_score, target_score, game, image_x = 680, image_y = 140, board [ 30 ] [ 16 ],
 block [ 7 ] [ 4 ] [ 4 ] [ 4 ] = {
 
 {                                                                               // ㄴ블럭2 
@@ -144,7 +143,8 @@ int Crash_Block ( block_info f_bval ) {
 	
 	for ( a = 0; a < 4; a++ ) {
 		for ( b = 0; b < 4; b++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] != 0 && board [ f_bval.ver + a ] [ f_bval.hor + b ] != 0 ) return 1 ;
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] != 0 && board [ f_bval.ver + a ] [ f_bval.hor + b ] != 0 )
+				return 1 ;
 		} // end b-loop
 	} // end a-loop
 	
@@ -247,7 +247,8 @@ int Clear_Line ( void ) {
 	
 	for ( a = 1; a < 21; a++ ) {
 		for ( b = 1; b < 11; b++ ) {
-			if ( board [ a ] [ b ] == 0 ) break;
+			if ( board [ a ] [ b ] == 0 ) 
+				break;
 		} // end b-loop
 		
 		if ( b == 11 ) {
@@ -276,7 +277,6 @@ int Count_Block ( block_info f_bval ) {																// 블록이 멈췄을 �
 		}
 	}
 
-	// printf ( "%d\n", count ) ;
 	return count ;
 }
 
@@ -287,11 +287,12 @@ int Count_Bottom ( block_info f_bval ) {															// 블록이 바닥과 �
 	if ( f_bval.ver > 17  ) {
 		for ( a = 0; a < 4; a++ ) {
 			for ( b = 0; b < 4; b++ ) {
-				if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] > 1 && board [ f_bval.ver + a ] [ f_bval.hor + b ] == 1 ) count++ ;
+				if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] > 1 && board [ f_bval.ver + a ] [ f_bval.hor + b ] == 1 )
+					count++ ;
 			}
 		}
 	}
-	// printf ( "%d\n", count ) ;
+
 	return count ;
 }
 
@@ -302,28 +303,32 @@ int Count_Side( block_info f_bval ) {																// 블록이 양쪽 벽과 
 	f_bval.ver = 1 ;  																				// 충돌 했을때는 정확히 벽과 만나는 면의 개수를 구하기 까다로움 
 	if ( f_bval.hor == 0 ) {
 		for ( a = 0; a < 4; a++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 1 ] > 1 ) count++ ;
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 1 ] > 1 ) 
+				count++ ;
 		}
 	}
 	
 	if ( f_bval.hor == 1 ) {
 		for ( a = 0; a < 4; a++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 0 ] > 1 ) count++ ;
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 0 ] > 1 ) 
+				count++ ;
 		}
 	}
 	
 	if ( f_bval.hor == 8 ) {
 		for ( a = 0; a < 4; a++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 2 ] > 1 ) count++ ;
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 2 ] > 1 ) 
+				count++ ;
 		}
 	}
 	
 	if ( f_bval.hor == 9 ) {
 		for ( a = 0; a < 4; a++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 1 ] > 1 ) count++ ;
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 1 ] > 1 ) 
+				count++ ;
 		}
 	}
-	 // printf ( "%d\n", count ) ;
+
 	return count ;
 }
 
@@ -341,7 +346,7 @@ int Count_Blank ( block_info f_bval ) {																// 블록이 멈췄을 �
 			}
 		}
 	}
-	// printf ( "%d", count ) ;
+
 	return count ;	
 }
 
@@ -354,13 +359,14 @@ int Complete_Line ( block_info f_bval ) {															// 블록이 멈춘 위�
 		for ( b = 0; b < 4; b++ ) {
 			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] != 0 ) {
 				for ( c = 1; c < 11; c++ ) {
-					if ( board [ f_bval.ver + a ] [ c ] > 1 ) count++ ;
+					if ( board [ f_bval.ver + a ] [ c ] > 1 ) 
+						count++ ;
 				}
 				break ;
 			}
 		}
 	}
-	// printf ( "%d\n", count ) ;
+
 	return count ;
 }
 
@@ -371,8 +377,10 @@ block_info Simul_Block ( void ) {
 	for ( test.spin = 0; test.spin < 4; test.spin++ ) {											// 검사할 블록의 회전 경우의 수
 		for ( test.hor = 0; test.hor < 10; test.hor++ ) {										// 검사할 블록의 가로 범위
 			test.ver = 1 ;
-			if ( Crash_Block ( test ) == 1 )  continue ;										// 시작하자마자 블록이 충돌하면 다음 순서의 블록을 확인
-			while ( Crash_Block ( test ) != 1 ) test.ver++ ;									// 검사할 블록을 멈출 때 까지 내림
+			if ( Crash_Block ( test ) == 1 )  
+				continue ;										// 시작하자마자 블록이 충돌하면 다음 순서의 블록을 확인
+			while ( Crash_Block ( test ) != 1 ) 
+				test.ver++ ;									// 검사할 블록을 멈출 때 까지 내림
 			cur_score = 1.2 * test.ver + 5.2 * Count_Block ( test ) - 12.1 * Count_Blank ( test ) + 5.4 * Count_Bottom ( test ) + 5.3 * Count_Side ( test )
 						+ 0.43 * Complete_Line ( test ) ;										// 블록이 도착했을 때 최적화 점수 값 계산
 				
@@ -389,9 +397,8 @@ block_info Simul_Block ( void ) {
 void Memory_Free ( void ) {
 	int a ;
 	
-	for ( a = 10; a >= 0; a-- ) {
+	for ( a = 10; a >= 0; a-- ) 
 		free ( image [ a ] ) ;
-	}
 }	
 
 
@@ -426,13 +433,7 @@ int main ( ) {
 		setvisualpage ( 1 - page ) ;
 		
 		cleardevice ( ) ;
-			
-		// apage = getactivepage ( ) ;
-		// vpage = getvisualpage ( ) ;
-		
-		// setvisualpage ( apage ) ;
-		// setactivepage ( vpage ) ;
-		
+					
 		putimage ( 0, 0, image [ 9 ], 0 ) ;
 		putimage ( image_x + 147 , image_y + 462, image [ 10 ], 0) ;
 	
@@ -446,7 +447,6 @@ int main ( ) {
 			ai = Simul_Block ( ) ;    
 			bval.hor = ai.hor ;
 			bval.spin = ai.spin ;
-			// printf ( "%d\n",  Count_Blank ( ai ) ) ; 
 		}
 		
 		bval.ver++ ;
@@ -496,11 +496,7 @@ int main ( ) {
 		
 		page = 1 - page ;
 		
-		// swapbuffers ( ) ;
-		
 		delay ( 1 ) ;
-		
-		
 	}
 	
 	Memory_Free ( ) ;
