@@ -18,11 +18,11 @@
 
 
 typedef struct strct_block_info {
-	unsigned char model ;											// the value of current block model
-	unsigned char next_model ;										// the value of next block model
-	unsigned char spin ;											// the next rotating block model value of the current block model 
-	int hor ;														// the horizon value of the current block model
-	int ver ;														// the vertical value of the current block model 
+	unsigned char model ;				// the value of current block model
+	unsigned char next_model ;			// the value of next block model
+	unsigned char spin ;				// the next rotating block model value of the current block model 
+	int hor ;							// the horizon value of the current block model
+	int ver ;							// the vertical value of the current block model 
 } block_info ;
 
 
@@ -88,7 +88,7 @@ char *image [ 11 ], image_name [ 9 ] [ 40 ], score [ 3 ] [ 30 ] ;
 // The function is used to call images that make up the Tetris
 // There is no return value
 // There is no parameter
-void Load_Image ( void ) {
+void LoadImage ( void ) {
 	int a, size ;
 	
 	sprintf ( image_name [ 0 ] , "./image/block_blank.jpg" ) ;
@@ -123,7 +123,7 @@ void Load_Image ( void ) {
 // The function is used to set the default value of the Tetris board
 // There is no return value
 // There is no parameter
-void Init_Board ( void ) {
+void InitBoard ( void ) {
 	int a, b ;
 	
 	// The default for all Tetris blocks is 20
@@ -445,9 +445,9 @@ int main ( ) {
 	
 	initwindow ( 1600, 900, "Tetris" ) ; 
 	
-	Load_Image ( ) ;
+	LoadImage ( ) ;
 	
-	Init_Board ( ) ; 
+	InitBoard ( ) ; 
 	
 	bval.model = rand ( ) % 7 ;
 	bval.next_model = rand ( ) % 7 ;
@@ -493,7 +493,7 @@ int main ( ) {
 			}
 			
 			if ( bval.ver < 2 ) {
-				Init_Board ( ) ;
+				InitBoard ( ) ;
 				game++ ;
 				sprintf ( score [ 0 ], "%d", game + 1 ) ;
 				is_score = 0;
