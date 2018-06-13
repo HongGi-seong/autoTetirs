@@ -6,6 +6,16 @@
 #include <conio.h>
 #include <time.h>
 
+#define BLOCK_IMAGE_SIZE 21
+#define BACKGROUND_WIDTH 1600
+#define BACKGROUND_HEIGHT 900
+#define SCORE_BOARD_WIDTH 105
+#define SCORE_BOARD_HEIGHT 147
+#define DEFAULT_HOR 4
+#define DEFAULT_VER -1
+#define DEFAULT_TETRIS_IMAGE_X 680
+#define DEFAULT_TETRIS_IMAGE_Y 140
+
 
 typedef struct strct_block_info {
 	unsigned char model ;											// the value of current block model
@@ -16,53 +26,53 @@ typedef struct strct_block_info {
 } block_info ;
 
 
-block_info bval = { 0, 0, 0, 4, -1 } ;
-unsigned int is_score, target_score, game, image_x = 680, image_y = 140, board [ 30 ] [ 16 ],
-block [ 7 ] [ 4 ] [ 4 ] [ 4 ] = {
+block_info bval = { 0, 0, 0, DEFAULT_HOR, DEFAULT_VER } ;
+unsigned int is_score, target_score, game, image_x = DEFAULT_TETRIS_IMAGE_X, image_y = DEFAULT_TETRIS_IMAGE_Y, board [ 30 ] [ 16 ] ;
+const unsigned int block [ 7 ] [ 4 ] [ 4 ] [ 4 ] = {
 
-{                                                                               // ㄴ블럭2 
+{                                                                               // l tetromino
 { {0, 0, 0, 0}, {2, 2, 2, 0}, {0, 0, 2, 0}, {0, 0, 0, 0} },
 { {0, 0, 2, 0}, {0, 0, 2, 0}, {0, 2, 2, 0}, {0, 0, 0, 0} },
 { {0, 0, 0, 0}, {0, 2, 0, 0}, {0, 2, 2, 2}, {0, 0, 0, 0} },
 { {0, 0, 0, 0}, {0, 2, 2, 0}, {0, 2, 0 ,0}, {0, 2, 0 ,0} } 
 },
 
-{                                                                               // 1자형 
+{                                                                               // i tetromino
 { {0, 0, 0, 0}, {0, 0, 0, 0}, {3, 3, 3, 3}, {0, 0, 0, 0} },
 { {0, 3, 0, 0}, {0, 3, 0, 0}, {0, 3, 0, 0}, {0, 3, 0, 0} },
 { {0, 0, 0, 0}, {3, 3, 3, 3}, {0, 0, 0, 0}, {0, 0, 0, 0} },
 { {0, 0, 3, 0}, {0, 0, 3, 0}, {0, 0, 3, 0}, {0, 0, 3, 0} } 
 },
 
-{                                                                               // ㄴ블럭2 
+{                                                                               // j tetromino
 { {0, 0, 0, 0}, {0, 0, 4, 0}, {4, 4, 4, 0}, {0, 0, 0, 0} },
 { {0, 4, 0, 0}, {0, 4, 0, 0}, {0, 4, 4, 0}, {0, 0, 0, 0} },
 { {0, 0, 0, 0}, {0, 4, 4, 4}, {0, 4, 0, 0}, {0, 0, 0, 0} },
 { {0, 0, 0, 0}, {0, 4, 4, 0}, {0, 0, 4, 0}, {0, 0, 4, 0} }
 },
 
-{                                                                               // 지그재그1 
+{                                                                               // z tetromino 
 { {0, 0, 0, 0}, {0, 5, 0, 0}, {0, 5, 5, 0}, {0, 0, 5, 0} },
 { {0, 0, 0, 0}, {0, 5, 5, 0}, {5, 5, 0, 0}, {0, 0, 0, 0} },
 { {0, 5, 0, 0}, {0, 5, 5, 0}, {0, 0, 5, 0}, {0, 0, 0, 0} },
 { {0, 0, 0, 0}, {0, 0, 5, 5}, {0, 5, 5, 0}, {0, 0, 0, 0} }
 },
 
-{                                                                               // 지그재그2 
+{                                                                               // s tetromino
 { {0, 0, 0, 0}, {0, 0, 6, 0}, {0, 6, 6, 0}, {0, 6, 0 ,0} },
 { {0, 0, 0, 0}, {6, 6, 0, 0}, {0, 6, 6, 0}, {0, 0, 0, 0} },
 { {0, 0, 6, 0}, {0, 6, 6, 0}, {0, 6, 0, 0}, {0, 0, 0, 0} },
 { {0, 0, 0, 0}, {0, 6, 6, 0}, {0, 0, 6, 6}, {0, 0, 0, 0} }
 },
 
-{                                                                               // 요철 
+{                                                                               // t tetromino
 { {0, 0, 0, 0}, {0, 7, 0, 0}, {7, 7, 7, 0}, {0, 0, 0, 0} },
 { {0, 7, 0, 0}, {0, 7, 7, 0}, {0, 7, 0, 0}, {0, 0, 0, 0} },
 { {0, 0, 0, 0}, {7, 7, 7, 0}, {0, 7, 0, 0}, {0, 0, 0, 0} },
 { {0, 0, 0, 0}, {0, 0, 7, 0}, {0, 7, 7, 0}, {0, 0, 7, 0} }      
 },
 
-{                                                                               // 사각형 
+{                                                                               // o tetromino 
 { {0, 0, 0, 0}, {0, 8, 8, 0}, {0, 8, 8, 0}, {0, 0, 0, 0 } },
 { {0, 0, 0, 0}, {0, 8, 8, 0}, {0, 8, 8, 0}, {0, 0, 0, 0 } },
 { {0, 0, 0, 0}, {0, 8, 8, 0}, {0, 8, 8, 0}, {0, 0, 0, 0 } },
@@ -75,8 +85,11 @@ block [ 7 ] [ 4 ] [ 4 ] [ 4 ] = {
 char *image [ 11 ], image_name [ 9 ] [ 40 ], score [ 3 ] [ 30 ] ;
 
 
+// The function is used to call images that make up the Tetris
+// There is no return value
+// There is no parameter
 void Load_Image ( void ) {
-	int a, b, size ;
+	int a, size ;
 	
 	sprintf ( image_name [ 0 ] , "./image/block_blank.jpg" ) ;
 	sprintf ( image_name [ 1 ] , "./image/block_color_gray.jpg" ) ;
@@ -89,43 +102,51 @@ void Load_Image ( void ) {
 	sprintf ( image_name [ 8 ] , "./image/block_color_yellow.jpg" ) ;
 	
 	for ( a = 0; a < 9; a++ ) {
-		readimagefile ( image_name [ a ], 0, 0, 21, 21 ) ;
-		size = imagesize ( 0, 0, 21, 21 ) ;
+		readimagefile ( image_name [ a ], 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE ) ;
+		size = imagesize ( 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE ) ;
 		image [ a ] = ( char * ) malloc ( size ) ;
-		getimage ( 0, 0, 21, 21, image [ a ] ) ;
+		getimage ( 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE, image [ a ] ) ;
 	}
 	
-	readimagefile ( "./image/background.jpg" , 0, 0, 1600, 900 ) ;
-	size = imagesize ( 0, 0, 1600, 900 ) ;
+	readimagefile ( "./image/background.jpg" , 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT ) ;
+	size = imagesize ( 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT ) ;
 	image [ 9 ] = ( char * ) malloc ( size ) ;
-	getimage ( 0, 0, 1600, 900, image [ 9 ] ) ;
+	getimage ( 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT, image [ 9 ] ) ;
 	
-	readimagefile ( "./image/score.jpg" , 0, 0, 105, 147 ) ;
-	size = imagesize ( 0, 0, 105, 147 ) ;
+	readimagefile ( "./image/score.jpg" , 0, 0, SCORE_BOARD_WIDTH, SCORE_BOARD_HEIGHT ) ;
+	size = imagesize ( 0, 0, SCORE_BOARD_WIDTH, SCORE_BOARD_HEIGHT ) ;
 	image [ 10 ] = ( char * ) malloc ( size ) ;
-	getimage ( 0, 0, 105, 147, image [ 10 ] ) ;
+	getimage ( 0, 0, SCORE_BOARD_WIDTH, SCORE_BOARD_HEIGHT, image [ 10 ] ) ;
 }
 
 
+// The function is used to set the default value of the Tetris board
+// There is no return value
+// There is no parameter
 void Init_Board ( void ) {
 	int a, b ;
 	
+	// The default for all Tetris blocks is 20
 	for ( a = 0; a < 26; a++ ) {
 		for ( b = 0; b < 16; b++ ) {
 			board [ a ] [ b ] = 20 ;
-		} // end b-loop
-	} // end a-loop
+		} 
+	} 
 	
+	// Build Tetris play space
 	for ( a = 0; a < 22; a++ ) {
 		for ( b = 0; b < 12; b++ ) {
 			if ( a == 0 || a == 21 || b == 0 || b == 11 ) {
+				// The value of the Tetris wall is 1
 				board [ a ] [ b ] = 1 ;
 			} else { 
+				// The value of the Tetris empty space is 0
 				board [ a ] [ b ] = 0 ;
 			}
-		} // end b-loop
-	} // end a-loop
+		} 
+	} 
 	
+	// Build Tetris block preview space
 	for ( a = 22; a < 29; a++ ) {
 		for ( b = 0; b < 7; b++ ) {
 			if ( b == 0 || b == 6 || a == 22 || a == 28 ) {
@@ -138,16 +159,20 @@ void Init_Board ( void ) {
 }
 
 
-int Crash_Block ( block_info f_bval ) {
+// The function is used to detect when two blocks collide
+// If two blocks collide, the function returns 1
+// The information of block is input as a parameter
+int CollisionBlock ( block_info f_bval ) {
 	int a, b ;
 	
 	for ( a = 0; a < 4; a++ ) {
 		for ( b = 0; b < 4; b++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] != 0 && board [ f_bval.ver + a ] [ f_bval.hor + b ] != 0 )
+			// When the value of the board at the current block position is not 0
+			if ( ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] != 0 )
+				&& ( board [ f_bval.ver + a ] [ f_bval.hor + b ] != 0 ) )
 				return 1 ;
-		} // end b-loop
-	} // end a-loop
-	
+		} 
+	} 
 	return 0 ;
 }
 
@@ -159,8 +184,9 @@ void Clear_Block ( void ) {
 	
 	for ( a = 0; a < 4; a++ ) {
 		for ( b = 0; b < 4; b++ ) {
-			if ( block [ bval.model ] [ bval.spin ] [ a ] [ b ] > 1 && board [ bval.ver + a ] [ bval.hor + b ] == 0 ) {
-				putimage ( image_x + ( bval.hor + b ) * 21, image_y + ( bval.ver + a ) * 21, image [ 0 ], 0 ) ;
+			if ( ( block [ bval.model ] [ bval.spin ] [ a ] [ b ] > 1 ) 
+				&& ( board [ bval.ver + a ] [ bval.hor + b ] == 0 ) ) {
+				putimage ( image_x + ( bval.hor + b ) * BLOCK_IMAGE_SIZE, image_y + ( bval.ver + a ) * BLOCK_IMAGE_SIZE, image [ 0 ], 0 ) ;
 			} // end if
 		} // end b-loop
 	} // end a-loop
@@ -176,7 +202,7 @@ void Draw_Block ( void ) {
 	for ( a = 0; a < 4; a++ ) {
 		for ( b = 0; b < 4; b ++ ) {
 			if ( block [ bval.model ] [ bval.spin ] [ a ] [ b ] > 1 ) {
-				putimage ( image_x + ( bval.hor + b ) * 21, image_y + ( bval.ver + a ) * 21, image [ block [ bval.model ] [ bval.spin ] [ a ] [ b ] ], 0 ) ;
+				putimage ( image_x + ( bval.hor + b ) * BLOCK_IMAGE_SIZE, image_y + ( bval.ver + a ) * BLOCK_IMAGE_SIZE, image [ block [ bval.model ] [ bval.spin ] [ a ] [ b ] ], 0 ) ;
 			} // end if
 		} // end b-loop
 	} // end a-loop
@@ -189,7 +215,7 @@ void Draw_Next ( void ) {
 	for ( a = 0; a < 4; a++ ) {
 		for ( b = 0; b < 4; b ++ ) {
 			if ( block [ bval.next_model ] [ 0 ] [ a ] [ b ] > 1 ) {
-				putimage ( image_x + ( b + 2 ) * 21, image_y + ( 23 + a ) * 21, image [ block [ bval.next_model ] [ 0 ] [ a ] [ b ] ], 0 ) ;
+				putimage ( image_x + ( b + 2 ) * BLOCK_IMAGE_SIZE, image_y + ( 23 + a ) * BLOCK_IMAGE_SIZE, image [ block [ bval.next_model ] [ 0 ] [ a ] [ b ] ], 0 ) ;
 			} // end if
 		} // end b-loop
 	} // end a-loop
@@ -203,7 +229,7 @@ void Clear_Next ( void ) {
 	for ( a = 0; a < 4; a++ ) {
 		for ( b = 0; b < 4; b ++ ) {
 			if ( block [ bval.next_model ] [ 0 ] [ a ] [ b ] > 1 ) {
-				putimage ( image_x + ( b + 2 ) * 21, image_y + ( 23 + a ) * 21, image [ 0 ], 0 ) ;
+				putimage ( image_x + ( b + 2 ) * BLOCK_IMAGE_SIZE, image_y + ( 23 + a ) * BLOCK_IMAGE_SIZE, image [ 0 ], 0 ) ;
 			} // end if
 		} // end b-loop
 	} // end a-loop
@@ -227,16 +253,16 @@ void Draw_Board ( void ) {
 	
 	for ( a = 0; a < 22; a++ ) {
 		for ( b = 0; b < 12; b++ ) {
-			putimage ( image_x + b * 21, image_y + a * 21, image [ board [ a ] [ b ] ], 0 ) ; 
+			putimage ( image_x + b * BLOCK_IMAGE_SIZE, image_y + a * BLOCK_IMAGE_SIZE, image [ board [ a ] [ b ] ], 0 ) ; 
 		} // end b-loop
 	} // end a-loop
 	
 	for ( a = 22; a < 29; a++ ) {
 		for ( b = 0; b < 7; b++ ) {
 			if ( b == 0 || b == 6 || a == 22 || a == 28 ) {
-				putimage ( image_x + b * 21, image_y + a * 21, image [ 1 ], 0 ) ;
+				putimage ( image_x + b * BLOCK_IMAGE_SIZE, image_y + a * BLOCK_IMAGE_SIZE, image [ 1 ], 0 ) ;
 			} else { 
-				putimage ( image_x + b * 21, image_y + a * 21, image [ 0 ], 0 ) ;
+				putimage ( image_x + b * BLOCK_IMAGE_SIZE, image_y + a * BLOCK_IMAGE_SIZE, image [ 0 ], 0 ) ;
 			}
 		}
 	}
@@ -377,9 +403,9 @@ block_info Simul_Block ( void ) {
 	for ( test.spin = 0; test.spin < 4; test.spin++ ) {											// 검사할 블록의 회전 경우의 수
 		for ( test.hor = 0; test.hor < 10; test.hor++ ) {										// 검사할 블록의 가로 범위
 			test.ver = 1 ;
-			if ( Crash_Block ( test ) == 1 )  
+			if ( CollisionBlock ( test ) == 1 )  
 				continue ;										// 시작하자마자 블록이 충돌하면 다음 순서의 블록을 확인
-			while ( Crash_Block ( test ) != 1 ) 
+			while ( CollisionBlock ( test ) != 1 ) 
 				test.ver++ ;									// 검사할 블록을 멈출 때 까지 내림
 			cur_score = 1.2 * test.ver + 5.2 * Count_Block ( test ) - 12.1 * Count_Blank ( test ) + 5.4 * Count_Bottom ( test ) + 5.3 * Count_Side ( test )
 						+ 0.43 * Complete_Line ( test ) ;										// 블록이 도착했을 때 최적화 점수 값 계산
@@ -451,7 +477,7 @@ int main ( ) {
 		
 		bval.ver++ ;
 		
-		if ( Crash_Block ( bval ) == 1 ) {
+		if ( CollisionBlock ( bval ) == 1 ) {
 			
 			Save_Block ( ) ;
 			
