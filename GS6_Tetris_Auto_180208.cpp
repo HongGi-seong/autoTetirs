@@ -89,7 +89,7 @@ char *image [ 11 ], image_name [ 9 ] [ 40 ], score [ 3 ] [ 30 ] ;
 // There is no return value
 // There is no parameter
 void LoadImage ( void ) {
-	int a, size ;
+	int index, size ;
 	
 	sprintf ( image_name [ 0 ] , "./image/block_blank.jpg" ) ;
 	sprintf ( image_name [ 1 ] , "./image/block_color_gray.jpg" ) ;
@@ -101,11 +101,11 @@ void LoadImage ( void ) {
 	sprintf ( image_name [ 7 ] , "./image/block_color_mint.jpg" ) ;
 	sprintf ( image_name [ 8 ] , "./image/block_color_yellow.jpg" ) ;
 	
-	for ( a = 0; a < 9; a++ ) {
-		readimagefile ( image_name [ a ], 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE ) ;
+	for ( index = 0; index < 9; index++ ) {
+		readimagefile ( image_name [ index ], 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE ) ;
 		size = imagesize ( 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE ) ;
-		image [ a ] = ( char * ) malloc ( size ) ;
-		getimage ( 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE, image [ a ] ) ;
+		image [ index ] = ( char * ) malloc ( size ) ;
+		getimage ( 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE, image [ index ] ) ;
 	}
 	
 	readimagefile ( "./image/background.jpg" , 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT ) ;
@@ -124,35 +124,35 @@ void LoadImage ( void ) {
 // There is no return value
 // There is no parameter
 void InitBoard ( void ) {
-	int a, b ;
+	int x, y ;
 	
 	// The default for all Tetris blocks is 20
-	for ( a = 0; a < 26; a++ ) {
-		for ( b = 0; b < 16; b++ ) {
-			board [ a ] [ b ] = 20 ;
+	for ( x = 0; x < 26; x++ ) {
+		for ( y = 0; y < 16; y++ ) {
+			board [ x ] [ y ] = 20 ;
 		} 
 	} 
 	
 	// Build Tetris play space
-	for ( a = 0; a < 22; a++ ) {
-		for ( b = 0; b < 12; b++ ) {
-			if ( a == 0 || a == 21 || b == 0 || b == 11 ) {
+	for ( x = 0; x < 22; x++ ) {
+		for ( y = 0; y < 12; y++ ) {
+			if ( x == 0 || x == 21 || y == 0 || y == 11 ) {
 				// The value of the Tetris wall is 1
-				board [ a ] [ b ] = 1 ;
+				board [ x ] [ y ] = 1 ;
 			} else { 
 				// The value of the Tetris empty space is 0
-				board [ a ] [ b ] = 0 ;
+				board [ x ] [ y ] = 0 ;
 			}
 		} 
 	} 
 	
 	// Build Tetris block preview space
-	for ( a = 22; a < 29; a++ ) {
-		for ( b = 0; b < 7; b++ ) {
-			if ( b == 0 || b == 6 || a == 22 || a == 28 ) {
-				board [ a ] [ b ] = 1 ;
+	for ( x = 22; x < 29; x++ ) {
+		for ( y = 0; y < 7; y++ ) {
+			if ( y == 0 || y == 6 || x == 22 || x == 28 ) {
+				board [ x ] [ y ] = 1 ;
 			} else { 
-				board [ a ] [ b ] = 0 ;
+				board [ x ] [ y ] = 0 ;
 			}
 		}
 	}
@@ -163,13 +163,14 @@ void InitBoard ( void ) {
 // If two blocks collide, the function returns 1
 // The information of block is input as a parameter
 int CollisionBlock ( block_info f_bval ) {
-	int a, b ;
+	int x, y ;
 	
-	for ( a = 0; a < 4; a++ ) {
-		for ( b = 0; b < 4; b++ ) {
+	for ( x = 0; x < 4; x++ ) {
+		for ( y = 0; y < 4; y++ ) {
 			// When the value of the board at the current block position is not 0
-			if ( ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] != 0 )
-				&& ( board [ f_bval.ver + a ] [ f_bval.hor + b ] != 0 ) )
+			if ( ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ y ] != 0 )
+				&& ( board [ f_bval.ver + x ] [ f_bval.hor + y ] != 0 ) )
+			
 				return 1 ;
 		} 
 	} 
@@ -177,62 +178,82 @@ int CollisionBlock ( block_info f_bval ) {
 }
 
 
-
-void Clear_Block ( void ) {
-	int a, b ;
-	block_info ghost ;
+// The function is used to remove afterimage when block moves
+// There is no return value
+// There is no parameter
+void RemoveAfterImage ( void ) {
+	int x, y ;
 	
-	for ( a = 0; a < 4; a++ ) {
-		for ( b = 0; b < 4; b++ ) {
-			if ( ( block [ bval.model ] [ bval.spin ] [ a ] [ b ] > 1 ) 
-				&& ( board [ bval.ver + a ] [ bval.hor + b ] == 0 ) ) {
-				putimage ( image_x + ( bval.hor + b ) * BLOCK_IMAGE_SIZE, image_y + ( bval.ver + a ) * BLOCK_IMAGE_SIZE, image [ 0 ], 0 ) ;
-			} // end if
-		} // end b-loop
-	} // end a-loop
+	for ( x = 0; x < 4; x++ ) {
+		for ( y = 0; y < 4; y++ ) {
+			// Do not erase the blocks on the Tetris board
+			if ( ( block [ bval.model ] [ bval.spin ] [ x ] [ y ] > 1 ) 
+				&& ( board [ bval.ver + x ] [ bval.hor + y ] == 0 ) ) {
+					
+				putimage ( image_x + ( bval.hor + y ) * BLOCK_IMAGE_SIZE,
+							image_y + ( bval.ver + x ) * BLOCK_IMAGE_SIZE, 
+							image [ 0 ],
+							0 ) ;
+			} 
+		} 
+	} 
 }
 
 
-
-
-void Draw_Block ( void ) {
-	int a, b ;
-	block_info ghost ;
+// The function is used to draw the current block on Tetris board
+// There is no return value
+// There is no parameter
+void DrawCurrentBlock ( void ) {
+	int x, y ;
 	
-	for ( a = 0; a < 4; a++ ) {
-		for ( b = 0; b < 4; b ++ ) {
-			if ( block [ bval.model ] [ bval.spin ] [ a ] [ b ] > 1 ) {
-				putimage ( image_x + ( bval.hor + b ) * BLOCK_IMAGE_SIZE, image_y + ( bval.ver + a ) * BLOCK_IMAGE_SIZE, image [ block [ bval.model ] [ bval.spin ] [ a ] [ b ] ], 0 ) ;
-			} // end if
-		} // end b-loop
-	} // end a-loop
+	for ( x = 0; x < 4; x++ ) {
+		for ( y = 0; y < 4; y ++ ) {
+			if ( block [ bval.model ] [ bval.spin ] [ x ] [ y ] > 1 ) {
+				putimage ( image_x + ( bval.hor + y ) * BLOCK_IMAGE_SIZE,
+							image_y + ( bval.ver + x ) * BLOCK_IMAGE_SIZE,
+							image [ block [ bval.model ] [ bval.spin ] [ x ] [ y ] ],
+							0 ) ;
+			} 
+		} 
+	} 
 }
 
 
-void Draw_Next ( void ) {
-	int a, b ;
+// The function is used to draw next block
+// There is no return value
+// There is no parameter
+void DrawNextBlock ( void ) {
+	int x, y ;
 	
-	for ( a = 0; a < 4; a++ ) {
-		for ( b = 0; b < 4; b ++ ) {
-			if ( block [ bval.next_model ] [ 0 ] [ a ] [ b ] > 1 ) {
-				putimage ( image_x + ( b + 2 ) * BLOCK_IMAGE_SIZE, image_y + ( 23 + a ) * BLOCK_IMAGE_SIZE, image [ block [ bval.next_model ] [ 0 ] [ a ] [ b ] ], 0 ) ;
-			} // end if
-		} // end b-loop
-	} // end a-loop
+	for ( x = 0; x < 4; x++ ) {
+		for ( y = 0; y < 4; y ++ ) {
+			if ( block [ bval.next_model ] [ 0 ] [ x ] [ y ] > 1 ) {
+				putimage ( image_x + ( y + 2 ) * BLOCK_IMAGE_SIZE,
+							image_y + ( 23 + x ) * BLOCK_IMAGE_SIZE, 
+							image [ block [ bval.next_model ] [ 0 ] [ x ] [ y ] ],
+							0 ) ;
+			} 
+		} 
+	} 
 }
 
 
-
-void Clear_Next ( void ) {
-	int a, b ;
+// The function is used to clear the next block
+// There is no return value
+// There is no parameter
+void ClearNextBlock ( void ) {
+	int x, y ;
 	
-	for ( a = 0; a < 4; a++ ) {
-		for ( b = 0; b < 4; b ++ ) {
-			if ( block [ bval.next_model ] [ 0 ] [ a ] [ b ] > 1 ) {
-				putimage ( image_x + ( b + 2 ) * BLOCK_IMAGE_SIZE, image_y + ( 23 + a ) * BLOCK_IMAGE_SIZE, image [ 0 ], 0 ) ;
-			} // end if
-		} // end b-loop
-	} // end a-loop
+	for ( x = 0; x < 4; x++ ) {
+		for ( y = 0; y < 4; y ++ ) {
+			if ( block [ bval.next_model ] [ 0 ] [ x ] [ y ] > 1 ) {
+				putimage ( image_x + ( y + 2 ) * BLOCK_IMAGE_SIZE, 
+							image_y + ( 23 + x ) * BLOCK_IMAGE_SIZE, 
+							image [ 0 ], 
+							0 ) ;
+			} 
+		} 
+	} 
 }
 
 
@@ -465,9 +486,9 @@ int main ( ) {
 	
 		Draw_Board ( ) ;
 	
-		Draw_Next ( ) ;
+		DrawNextBlock ( ) ;
 		
-		Clear_Block ( ) ;
+		RemoveAfterImage ( ) ;
 		
 		if ( bval.ver == 0 ) {
 			ai = Simul_Block ( ) ;    
@@ -500,16 +521,16 @@ int main ( ) {
 				sprintf ( score [ 1 ], "%d", 0 ) ;
 			}
 			
-			Clear_Next ( ) ;
+			ClearNextBlock ( ) ;
 			bval.ver = 0 ;
 			bval.hor = 4 ;
 			bval.model = bval.next_model ;
 			bval.next_model = rand ( ) % 7 ;
 			bval.spin = 0 ;
-			Draw_Next ( ) ;
+			DrawNextBlock ( ) ;
 		}
 		
-		Draw_Block ( ) ;
+		DrawCurrentBlock ( ) ;
 		
 		outtextxy ( image_x + 150, image_y + 470, "Games" ) ;
 		outtextxy ( image_x + 150, image_y + 490, score [ 0 ] ) ;
