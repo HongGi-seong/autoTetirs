@@ -337,7 +337,7 @@ void ClearLine ( void ) {
 // This function is used to count the number of blocks around when a block collides
 // The return value is the number of adjacent blocks
 // Use the information of the block as a parameter
-int Count_Block ( block_info f_bval ) {																
+int CountAroundBlock ( block_info f_bval ) {																
 	int x, y, count = 0 ;
 	
 	// The block should be one line higher than the point at which it collides
@@ -358,13 +358,18 @@ int Count_Block ( block_info f_bval ) {
 }
 
 
-int Count_Bottom ( block_info f_bval ) {															// 블록이 바닥과 만나는 블록 면의 개수를 세는 함수
-	int a, b, count = 0 ;
+// The function is used to count the number of blocks that meet the bottom of the Tetris board
+// Returns the number of blocks that meet the bottom of the Tetris board
+// Use the information of the block as a parameter
+int CountBottom ( block_info f_bval ) {															
+	int x, y, count = 0 ;
 	
 	if ( f_bval.ver > 17  ) {
-		for ( a = 0; a < 4; a++ ) {
-			for ( b = 0; b < 4; b++ ) {
-				if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] > 1 && board [ f_bval.ver + a ] [ f_bval.hor + b ] == 1 )
+		for ( x = 0; x < 4; x++ ) {
+			for ( y = 0; y < 4; y++ ) {
+				if ( ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ y ] > 1 )
+					&& ( board [ f_bval.ver + x ] [ f_bval.hor + y ] == 1 ) )
+				
 					count++ ;
 			}
 		}
@@ -374,34 +379,37 @@ int Count_Bottom ( block_info f_bval ) {															// 블록이 바닥과 �
 }
 
 
-int Count_Side( block_info f_bval ) {																// 블록이 양쪽 벽과 만나는 면의 개수를 세는 함수
-	int a, b, count = 0 ;
+// This function is used to count the number of blocks that meet each side wall of the Tetris board
+// Returns the number of blocks that meet each side of the Tetris board
+// Use the information of the block as a parameter
+int CountSide( block_info f_bval ) {															
+	int x, count = 0 ;
 	
-	f_bval.ver = 1 ;  																				// 충돌 했을때는 정확히 벽과 만나는 면의 개수를 구하기 까다로움 
+	f_bval.ver = 1 ;  																				
 	if ( f_bval.hor == 0 ) {
-		for ( a = 0; a < 4; a++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 1 ] > 1 ) 
+		for ( x = 0; x < 4; x++ ) {
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ 1 ] > 1 ) 
 				count++ ;
 		}
 	}
 	
 	if ( f_bval.hor == 1 ) {
-		for ( a = 0; a < 4; a++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 0 ] > 1 ) 
+		for ( x = 0; x < 4; x++ ) {
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ 0 ] > 1 ) 
 				count++ ;
 		}
 	}
 	
 	if ( f_bval.hor == 8 ) {
-		for ( a = 0; a < 4; a++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 2 ] > 1 ) 
+		for ( x = 0; x < 4; x++ ) {
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ 2 ] > 1 ) 
 				count++ ;
 		}
 	}
 	
 	if ( f_bval.hor == 9 ) {
-		for ( a = 0; a < 4; a++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ 1 ] > 1 ) 
+		for ( x = 0; x < 4; x++ ) {
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ 1 ] > 1 ) 
 				count++ ;
 		}
 	}
@@ -410,15 +418,20 @@ int Count_Side( block_info f_bval ) {																// 블록이 양쪽 벽과 
 }
 
 
-int Count_Blank ( block_info f_bval ) {																// 블록이 멈췄을 때 블록 면 바로 아래의 빈공간 세는 함수
-	int a, b, count = 0 ;
+// This function is used to count the number of spaces below the block when the block collides
+// Returns the number of empty spaces
+// Use the information of the block as a parameter
+int CountBlank ( block_info f_bval ) {																
+	int x, y, count = 0 ;
 	
 	f_bval.ver -- ;
-	for ( a = 0; a < 4; a++ ) {
-		for ( b = 0; b < 4; b++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] > 1 ) {
-				if ( block [ f_bval.model ] [ f_bval.spin ] [ a + 1 ] [ b ] == 0 ) {				// 블록 면 바로 아래에 자신의 블록이 없는지 체크
-					if ( board [ f_bval.ver + a + 1 ] [ f_bval.hor + b ] == 0 ) count++ ;
+	for ( x = 0; x < 4; x++ ) {
+		for ( y = 0; y < 4; y++ ) {
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ y ] > 1 ) {
+				// The block below a line must not be itself
+				if ( block [ f_bval.model ] [ f_bval.spin ] [ x + 1 ] [ y ] == 0 ) {				
+					if ( board [ f_bval.ver + x + 1 ] [ f_bval.hor + y ] == 0 ) 
+						count++ ;
 				}
 			}
 		}
@@ -428,15 +441,18 @@ int Count_Blank ( block_info f_bval ) {																// 블록이 멈췄을 �
 }
 
 
-int Complete_Line ( block_info f_bval ) {															// 블록이 멈춘 위치의 라인에 얼마나 많은 블록 면들이 채워져 있는지 확인하는 함수
-	int a, b, c, count = 0;
+// The function is used to count the number of blocks that exist on the line when the block collides
+// Returns the number of blocks in the line
+// Use the information of the block as a parameter
+int Complete_Line ( block_info f_bval ) {															
+	int x, y, c, count = 0;
 	
 	f_bval.ver-- ;
-	for ( a = 0; a < 4; a++ ) {
-		for ( b = 0; b < 4; b++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] != 0 ) {
+	for ( x = 0; x < 4; x++ ) {
+		for ( y = 0; y < 4; y++ ) {
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ y ] != 0 ) {
 				for ( c = 1; c < 11; c++ ) {
-					if ( board [ f_bval.ver + a ] [ c ] > 1 ) 
+					if ( board [ f_bval.ver + x ] [ c ] > 1 ) 
 						count++ ;
 				}
 				break ;
@@ -458,7 +474,11 @@ block_info Simul_Block ( void ) {
 				continue ;										// 시작하자마자 블록이 충돌하면 다음 순서의 블록을 확인
 			while ( CollisionBlock ( test ) != 1 ) 
 				test.ver++ ;									// 검사할 블록을 멈출 때 까지 내림
-			cur_score = 1.2 * test.ver + 5.2 * Count_Block ( test ) - 12.1 * Count_Blank ( test ) + 5.4 * Count_Bottom ( test ) + 5.3 * Count_Side ( test )
+			cur_score = 1.2 * test.ver 
+						+ 5.2 * CountAroundBlock ( test ) 
+						- 12.1 * CountBlank ( test ) 
+						+ 5.4 * CountBottom ( test )
+						+ 5.3 * CountSide ( test )
 						+ 0.43 * Complete_Line ( test ) ;										// 블록이 도착했을 때 최적화 점수 값 계산
 				
 			if ( top_score < cur_score ) {														// 최적화 점수 값이 최고로 높은 값을 max에 입력
