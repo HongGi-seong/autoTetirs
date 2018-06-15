@@ -257,46 +257,70 @@ void ClearNextBlock ( void ) {
 }
 
 
-
-void Save_Block ( void ) {
-	int a, b ;
+// This function is used to store blocks on a Tetris board if a block collides
+// There is no return value
+// There is no parameter
+void SaveBlock ( void ) {
+	int x, y ;
 	
-	for ( a = 0; a < 4; a++ ) {
-		for ( b = 0; b < 4; b++ ) { 
-			if ( block [ bval.model ] [ bval.spin ] [ a ] [ b ] != 0 ) board [ bval.ver + a -1 ] [ bval.hor + b ] = block [ bval.model ] [ bval.spin ] [ a ] [ b ] ;
+	for ( x = 0; x < 4; x++ ) {
+		for ( y = 0; y < 4; y++ ) { 
+			if ( block [ bval.model ] [ bval.spin ] [ x ] [ y ] != 0 )
+				// Block is stored above the collision point
+				board [ bval.ver + x - 1 ] [ bval.hor + y ] = block [ bval.model ] [ bval.spin ] [ x ] [ y ] ;
 		}
 	}	
 }
 
 
-void Draw_Board ( void ) {
-	int a, b ;
+// This function is used to draw the Tetris board
+// There is no return value
+// There is no parameter
+void DrawBoard ( void ) {
+	int x, y ;
 	
-	for ( a = 0; a < 22; a++ ) {
-		for ( b = 0; b < 12; b++ ) {
-			putimage ( image_x + b * BLOCK_IMAGE_SIZE, image_y + a * BLOCK_IMAGE_SIZE, image [ board [ a ] [ b ] ], 0 ) ; 
-		} // end b-loop
-	} // end a-loop
+	// Draw the play area
+	for ( x = 0; x < 22; x++ ) {
+		for ( y = 0; y < 12; y++ ) {
+			putimage ( image_x + y * BLOCK_IMAGE_SIZE,
+						image_y + x * BLOCK_IMAGE_SIZE, 
+						image [ board [ x ] [ y ] ], 
+						0 ) ; 
+		} 
+	} 
 	
-	for ( a = 22; a < 29; a++ ) {
-		for ( b = 0; b < 7; b++ ) {
-			if ( b == 0 || b == 6 || a == 22 || a == 28 ) {
-				putimage ( image_x + b * BLOCK_IMAGE_SIZE, image_y + a * BLOCK_IMAGE_SIZE, image [ 1 ], 0 ) ;
+	// Draw preview area
+	for ( x = 22; x < 29; x++ ) {
+		for ( y = 0; y < 7; y++ ) {
+			if ( y == 0 || y == 6 || x == 22 || x == 28 ) {
+				putimage ( image_x + y * BLOCK_IMAGE_SIZE, 
+							image_y + x * BLOCK_IMAGE_SIZE,
+							image [ 1 ], 
+							0 ) ;
 			} else { 
-				putimage ( image_x + b * BLOCK_IMAGE_SIZE, image_y + a * BLOCK_IMAGE_SIZE, image [ 0 ], 0 ) ;
+				putimage ( image_x + y * BLOCK_IMAGE_SIZE, 
+							image_y + x * BLOCK_IMAGE_SIZE, 
+							image [ 0 ], 
+							0 ) ;
 			}
 		}
 	}
 }
 
-int Clear_Line ( void ) {
+
+// This function is used to erase a line if it is filled with blocks
+// Also lower the block above the line
+// There is no return value
+// There is no parameter
+void ClearLine ( void ) {
 	int a, b, c, d ; 
 	
 	for ( a = 1; a < 21; a++ ) {
 		for ( b = 1; b < 11; b++ ) {
+			// There is no need to check for empty spaces
 			if ( board [ a ] [ b ] == 0 ) 
 				break;
-		} // end b-loop
+		} 
 		
 		if ( b == 11 ) {
 			is_score += 10 ;
@@ -305,21 +329,27 @@ int Clear_Line ( void ) {
 					board [ c ] [ d ] = board [ c - 1 ] [ d ] ;
 				}
 			}
-		} // end if
-	} // end a-loop
+		} 
+	}
 }
 
 
-int Count_Block ( block_info f_bval ) {																// 블록이 멈췄을 때 주변에 블록 면들의 개수를 세는 함수
-	int a, b, count = 0 ;
+// This function is used to count the number of blocks around when a block collides
+// The return value is the number of adjacent blocks
+// Use the information of the block as a parameter
+int Count_Block ( block_info f_bval ) {																
+	int x, y, count = 0 ;
 	
-	f_bval.ver --;																					// 블록이 겹쳤을 때의 ver값을 가져오기 때문에 -1
-	for ( a = 0; a < 4; a++ ) {
-		for ( b = 0; b < 4; b ++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ a ] [ b ] > 1 ) {
-				if ( board [ f_bval.ver + a ] [ f_bval.hor + b - 1 ] > 1 ) count++ ;
-				if ( board [ f_bval.ver + a ] [ f_bval.hor + b + 1 ] > 1 ) count++ ;
-				if ( board [ f_bval.ver + a + 1 ] [ f_bval.hor + b ] > 1 ) count++ ;
+	// The block should be one line higher than the point at which it collides
+	f_bval.ver --;																					
+	for ( x = 0; x < 4; x++ ) {
+		for ( y = 0; y < 4; y ++ ) {
+			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ y ] > 1 ) {
+				if ( ( board [ f_bval.ver + x ] [ f_bval.hor + y - 1 ] > 1 )
+					|| ( board [ f_bval.ver + x ] [ f_bval.hor + y + 1 ] > 1 )
+					|| ( board [ f_bval.ver + x + 1 ] [ f_bval.hor + y ] > 1 ) ) 
+					
+					count++ ;
 			}
 		}
 	}
@@ -484,7 +514,7 @@ int main ( ) {
 		putimage ( 0, 0, image [ 9 ], 0 ) ;
 		putimage ( image_x + 147 , image_y + 462, image [ 10 ], 0) ;
 	
-		Draw_Board ( ) ;
+		DrawBoard ( ) ;
 	
 		DrawNextBlock ( ) ;
 		
@@ -500,11 +530,11 @@ int main ( ) {
 		
 		if ( CollisionBlock ( bval ) == 1 ) {
 			
-			Save_Block ( ) ;
+			SaveBlock ( ) ;
 			
-			Draw_Board ( ) ;
+			DrawBoard ( ) ;
 			
-			Clear_Line ( ) ;
+			ClearLine ( ) ;
 			
 			sprintf ( score [ 1 ], "%d", is_score ) ;
 			
