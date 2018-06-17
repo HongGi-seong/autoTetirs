@@ -15,19 +15,21 @@
 #define DEFAULT_VER -1
 #define DEFAULT_TETRIS_IMAGE_X 680
 #define DEFAULT_TETRIS_IMAGE_Y 140
+#define TETRIS_WIDTH 1600
+#define TETRIS_HEIGHT 900
 
 
-typedef struct strct_block_info {
+typedef struct strct_blockInfo {
 	unsigned char model ;				// the value of current block model
 	unsigned char next_model ;			// the value of next block model
 	unsigned char spin ;				// the next rotating block model value of the current block model 
 	int hor ;							// the horizon value of the current block model
 	int ver ;							// the vertical value of the current block model 
-} block_info ;
+} blockInfo ;
 
 
-block_info bval = { 0, 0, 0, DEFAULT_HOR, DEFAULT_VER } ;
-unsigned int is_score, target_score, game, image_x = DEFAULT_TETRIS_IMAGE_X, image_y = DEFAULT_TETRIS_IMAGE_Y, board [ 30 ] [ 16 ] ;
+blockInfo playBlock = { 0, 0, 0, DEFAULT_HOR, DEFAULT_VER } ;
+unsigned int isScore, topScore, game, image_x = DEFAULT_TETRIS_IMAGE_X, image_y = DEFAULT_TETRIS_IMAGE_Y, board [ 30 ] [ 16 ] ;
 const unsigned int block [ 7 ] [ 4 ] [ 4 ] [ 4 ] = {
 
 {                                                                               // l tetromino
@@ -82,27 +84,28 @@ const unsigned int block [ 7 ] [ 4 ] [ 4 ] [ 4 ] = {
 }; 
 
 
-char *image [ 11 ], image_name [ 9 ] [ 40 ], score [ 3 ] [ 30 ] ;
+char *image [ 11 ], imageName [ 9 ] [ 40 ], score [ 3 ] [ 30 ] ;
 
 
 // The function is used to call images that make up the Tetris
 // There is no return value
 // There is no parameter
-void LoadImage ( void ) {
+void LoadImage ( void ) 
+{
 	int index, size ;
 	
-	sprintf ( image_name [ 0 ] , "./image/block_blank.jpg" ) ;
-	sprintf ( image_name [ 1 ] , "./image/block_color_gray.jpg" ) ;
-	sprintf ( image_name [ 2 ] , "./image/block_color_blue.jpg" ) ;
-	sprintf ( image_name [ 3 ] , "./image/block_color_green.jpg" ) ;
-	sprintf ( image_name [ 4 ] , "./image/block_color_land.jpg" ) ;
-	sprintf ( image_name [ 5 ] , "./image/block_color_purple.jpg" ) ;
-	sprintf ( image_name [ 6 ] , "./image/block_color_red.jpg" ) ;
-	sprintf ( image_name [ 7 ] , "./image/block_color_mint.jpg" ) ;
-	sprintf ( image_name [ 8 ] , "./image/block_color_yellow.jpg" ) ;
+	sprintf ( imageName [ 0 ] , "./image/block_blank.jpg" ) ;
+	sprintf ( imageName [ 1 ] , "./image/block_color_gray.jpg" ) ;
+	sprintf ( imageName [ 2 ] , "./image/block_color_blue.jpg" ) ;
+	sprintf ( imageName [ 3 ] , "./image/block_color_green.jpg" ) ;
+	sprintf ( imageName [ 4 ] , "./image/block_color_land.jpg" ) ;
+	sprintf ( imageName [ 5 ] , "./image/block_color_purple.jpg" ) ;
+	sprintf ( imageName [ 6 ] , "./image/block_color_red.jpg" ) ;
+	sprintf ( imageName [ 7 ] , "./image/block_color_mint.jpg" ) ;
+	sprintf ( imageName [ 8 ] , "./image/block_color_yellow.jpg" ) ;
 	
 	for ( index = 0; index < 9; index++ ) {
-		readimagefile ( image_name [ index ], 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE ) ;
+		readimagefile ( imageName [ index ], 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE ) ;
 		size = imagesize ( 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE ) ;
 		image [ index ] = ( char * ) malloc ( size ) ;
 		getimage ( 0, 0, BLOCK_IMAGE_SIZE, BLOCK_IMAGE_SIZE, image [ index ] ) ;
@@ -123,7 +126,8 @@ void LoadImage ( void ) {
 // The function is used to set the default value of the Tetris board
 // There is no return value
 // There is no parameter
-void InitBoard ( void ) {
+void InitBoard ( void ) 
+{
 	int x, y ;
 	
 	// The default for all Tetris blocks is 20
@@ -162,14 +166,15 @@ void InitBoard ( void ) {
 // The function is used to detect when two blocks collide
 // If two blocks collide, the function returns 1
 // The information of block is input as a parameter
-int CollisionBlock ( block_info f_bval ) {
+int CollisionBlock ( blockInfo f_playBlock ) 
+{
 	int x, y ;
 	
 	for ( x = 0; x < 4; x++ ) {
 		for ( y = 0; y < 4; y++ ) {
 			// When the value of the board at the current block position is not 0
-			if ( ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ y ] != 0 )
-				&& ( board [ f_bval.ver + x ] [ f_bval.hor + y ] != 0 ) )
+			if ( ( block [ f_playBlock.model ] [ f_playBlock.spin ] [ x ] [ y ] != 0 )
+				&& ( board [ f_playBlock.ver + x ] [ f_playBlock.hor + y ] != 0 ) )
 			
 				return 1 ;
 		} 
@@ -181,17 +186,18 @@ int CollisionBlock ( block_info f_bval ) {
 // The function is used to remove afterimage when block moves
 // There is no return value
 // There is no parameter
-void RemoveAfterImage ( void ) {
+void RemoveAfterImage ( void ) 
+{
 	int x, y ;
 	
 	for ( x = 0; x < 4; x++ ) {
 		for ( y = 0; y < 4; y++ ) {
 			// Do not erase the blocks on the Tetris board
-			if ( ( block [ bval.model ] [ bval.spin ] [ x ] [ y ] > 1 ) 
-				&& ( board [ bval.ver + x ] [ bval.hor + y ] == 0 ) ) {
+			if ( ( block [ playBlock.model ] [ playBlock.spin ] [ x ] [ y ] > 1 ) 
+				&& ( board [ playBlock.ver + x ] [ playBlock.hor + y ] == 0 ) ) {
 					
-				putimage ( image_x + ( bval.hor + y ) * BLOCK_IMAGE_SIZE,
-							image_y + ( bval.ver + x ) * BLOCK_IMAGE_SIZE, 
+				putimage ( image_x + ( playBlock.hor + y ) * BLOCK_IMAGE_SIZE,
+							image_y + ( playBlock.ver + x ) * BLOCK_IMAGE_SIZE, 
 							image [ 0 ],
 							0 ) ;
 			} 
@@ -203,15 +209,16 @@ void RemoveAfterImage ( void ) {
 // The function is used to draw the current block on Tetris board
 // There is no return value
 // There is no parameter
-void DrawCurrentBlock ( void ) {
+void DrawCurrentBlock ( void ) 
+{
 	int x, y ;
 	
 	for ( x = 0; x < 4; x++ ) {
 		for ( y = 0; y < 4; y ++ ) {
-			if ( block [ bval.model ] [ bval.spin ] [ x ] [ y ] > 1 ) {
-				putimage ( image_x + ( bval.hor + y ) * BLOCK_IMAGE_SIZE,
-							image_y + ( bval.ver + x ) * BLOCK_IMAGE_SIZE,
-							image [ block [ bval.model ] [ bval.spin ] [ x ] [ y ] ],
+			if ( block [ playBlock.model ] [ playBlock.spin ] [ x ] [ y ] > 1 ) {
+				putimage ( image_x + ( playBlock.hor + y ) * BLOCK_IMAGE_SIZE,
+							image_y + ( playBlock.ver + x ) * BLOCK_IMAGE_SIZE,
+							image [ block [ playBlock.model ] [ playBlock.spin ] [ x ] [ y ] ],
 							0 ) ;
 			} 
 		} 
@@ -222,15 +229,16 @@ void DrawCurrentBlock ( void ) {
 // The function is used to draw next block
 // There is no return value
 // There is no parameter
-void DrawNextBlock ( void ) {
+void DrawNextBlock ( void ) 
+{
 	int x, y ;
 	
 	for ( x = 0; x < 4; x++ ) {
 		for ( y = 0; y < 4; y ++ ) {
-			if ( block [ bval.next_model ] [ 0 ] [ x ] [ y ] > 1 ) {
+			if ( block [ playBlock.next_model ] [ 0 ] [ x ] [ y ] > 1 ) {
 				putimage ( image_x + ( y + 2 ) * BLOCK_IMAGE_SIZE,
 							image_y + ( 23 + x ) * BLOCK_IMAGE_SIZE, 
-							image [ block [ bval.next_model ] [ 0 ] [ x ] [ y ] ],
+							image [ block [ playBlock.next_model ] [ 0 ] [ x ] [ y ] ],
 							0 ) ;
 			} 
 		} 
@@ -241,12 +249,13 @@ void DrawNextBlock ( void ) {
 // The function is used to clear the next block
 // There is no return value
 // There is no parameter
-void ClearNextBlock ( void ) {
+void ClearNextBlock ( void ) 
+{
 	int x, y ;
 	
 	for ( x = 0; x < 4; x++ ) {
 		for ( y = 0; y < 4; y ++ ) {
-			if ( block [ bval.next_model ] [ 0 ] [ x ] [ y ] > 1 ) {
+			if ( block [ playBlock.next_model ] [ 0 ] [ x ] [ y ] > 1 ) {
 				putimage ( image_x + ( y + 2 ) * BLOCK_IMAGE_SIZE, 
 							image_y + ( 23 + x ) * BLOCK_IMAGE_SIZE, 
 							image [ 0 ], 
@@ -260,14 +269,15 @@ void ClearNextBlock ( void ) {
 // This function is used to store blocks on a Tetris board if a block collides
 // There is no return value
 // There is no parameter
-void SaveBlock ( void ) {
+void SaveBlock ( void ) 
+{
 	int x, y ;
 	
 	for ( x = 0; x < 4; x++ ) {
 		for ( y = 0; y < 4; y++ ) { 
-			if ( block [ bval.model ] [ bval.spin ] [ x ] [ y ] != 0 )
+			if ( block [ playBlock.model ] [ playBlock.spin ] [ x ] [ y ] != 0 )
 				// Block is stored above the collision point
-				board [ bval.ver + x - 1 ] [ bval.hor + y ] = block [ bval.model ] [ bval.spin ] [ x ] [ y ] ;
+				board [ playBlock.ver + x - 1 ] [ playBlock.hor + y ] = block [ playBlock.model ] [ playBlock.spin ] [ x ] [ y ] ;
 		}
 	}	
 }
@@ -276,7 +286,8 @@ void SaveBlock ( void ) {
 // This function is used to draw the Tetris board
 // There is no return value
 // There is no parameter
-void DrawBoard ( void ) {
+void DrawBoard ( void ) 
+{
 	int x, y ;
 	
 	// Draw the play area
@@ -312,7 +323,8 @@ void DrawBoard ( void ) {
 // Also lower the block above the line
 // There is no return value
 // There is no parameter
-void ClearLine ( void ) {
+void ClearLine ( void ) 
+{
 	int a, b, c, d ; 
 	
 	for ( a = 1; a < 21; a++ ) {
@@ -323,7 +335,7 @@ void ClearLine ( void ) {
 		} 
 		
 		if ( b == 11 ) {
-			is_score += 10 ;
+			isScore += 10 ;
 			for ( c = a; c > 1; c-- ) {
 				for ( d = 1; d < 11; d++ )  {
 					board [ c ] [ d ] = board [ c - 1 ] [ d ] ;
@@ -337,17 +349,18 @@ void ClearLine ( void ) {
 // This function is used to count the number of blocks around when a block collides
 // The return value is the number of adjacent blocks
 // Use the information of the block as a parameter
-int CountAroundBlock ( block_info f_bval ) {																
+int CountAroundBlock ( blockInfo f_playBlock ) 
+{																
 	int x, y, count = 0 ;
 	
 	// The block should be one line higher than the point at which it collides
-	f_bval.ver --;																					
+	f_playBlock.ver --;																					
 	for ( x = 0; x < 4; x++ ) {
 		for ( y = 0; y < 4; y ++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ y ] > 1 ) {
-				if ( ( board [ f_bval.ver + x ] [ f_bval.hor + y - 1 ] > 1 )
-					|| ( board [ f_bval.ver + x ] [ f_bval.hor + y + 1 ] > 1 )
-					|| ( board [ f_bval.ver + x + 1 ] [ f_bval.hor + y ] > 1 ) ) 
+			if ( block [ f_playBlock.model ] [ f_playBlock.spin ] [ x ] [ y ] > 1 ) {
+				if ( ( board [ f_playBlock.ver + x ] [ f_playBlock.hor + y - 1 ] > 1 )
+					|| ( board [ f_playBlock.ver + x ] [ f_playBlock.hor + y + 1 ] > 1 )
+					|| ( board [ f_playBlock.ver + x + 1 ] [ f_playBlock.hor + y ] > 1 ) ) 
 					
 					count++ ;
 			}
@@ -361,14 +374,15 @@ int CountAroundBlock ( block_info f_bval ) {
 // The function is used to count the number of blocks that meet the bottom of the Tetris board
 // Returns the number of blocks that meet the bottom of the Tetris board
 // Use the information of the block as a parameter
-int CountBottom ( block_info f_bval ) {															
+int CountBottom ( blockInfo f_playBlock )
+{															
 	int x, y, count = 0 ;
 	
-	if ( f_bval.ver > 17  ) {
+	if ( f_playBlock.ver > 17  ) {
 		for ( x = 0; x < 4; x++ ) {
 			for ( y = 0; y < 4; y++ ) {
-				if ( ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ y ] > 1 )
-					&& ( board [ f_bval.ver + x ] [ f_bval.hor + y ] == 1 ) )
+				if ( ( block [ f_playBlock.model ] [ f_playBlock.spin ] [ x ] [ y ] > 1 )
+					&& ( board [ f_playBlock.ver + x ] [ f_playBlock.hor + y ] == 1 ) )
 				
 					count++ ;
 			}
@@ -382,34 +396,35 @@ int CountBottom ( block_info f_bval ) {
 // This function is used to count the number of blocks that meet each side wall of the Tetris board
 // Returns the number of blocks that meet each side of the Tetris board
 // Use the information of the block as a parameter
-int CountSide( block_info f_bval ) {															
+int CountSide( blockInfo f_playBlock ) 
+{															
 	int x, count = 0 ;
 	
-	f_bval.ver = 1 ;  																				
-	if ( f_bval.hor == 0 ) {
+	f_playBlock.ver = 1 ;  																				
+	if ( f_playBlock.hor == 0 ) {
 		for ( x = 0; x < 4; x++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ 1 ] > 1 ) 
+			if ( block [ f_playBlock.model ] [ f_playBlock.spin ] [ x ] [ 1 ] > 1 ) 
 				count++ ;
 		}
 	}
 	
-	if ( f_bval.hor == 1 ) {
+	if ( f_playBlock.hor == 1 ) {
 		for ( x = 0; x < 4; x++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ 0 ] > 1 ) 
+			if ( block [ f_playBlock.model ] [ f_playBlock.spin ] [ x ] [ 0 ] > 1 ) 
 				count++ ;
 		}
 	}
 	
-	if ( f_bval.hor == 8 ) {
+	if ( f_playBlock.hor == 8 ) {
 		for ( x = 0; x < 4; x++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ 2 ] > 1 ) 
+			if ( block [ f_playBlock.model ] [ f_playBlock.spin ] [ x ] [ 2 ] > 1 ) 
 				count++ ;
 		}
 	}
 	
-	if ( f_bval.hor == 9 ) {
+	if ( f_playBlock.hor == 9 ) {
 		for ( x = 0; x < 4; x++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ 1 ] > 1 ) 
+			if ( block [ f_playBlock.model ] [ f_playBlock.spin ] [ x ] [ 1 ] > 1 ) 
 				count++ ;
 		}
 	}
@@ -421,16 +436,17 @@ int CountSide( block_info f_bval ) {
 // This function is used to count the number of spaces below the block when the block collides
 // Returns the number of empty spaces
 // Use the information of the block as a parameter
-int CountBlank ( block_info f_bval ) {																
+int CountBlank ( blockInfo f_playBlock ) 
+{																
 	int x, y, count = 0 ;
 	
-	f_bval.ver -- ;
+	f_playBlock.ver -- ;
 	for ( x = 0; x < 4; x++ ) {
 		for ( y = 0; y < 4; y++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ y ] > 1 ) {
+			if ( block [ f_playBlock.model ] [ f_playBlock.spin ] [ x ] [ y ] > 1 ) {
 				// The block below a line must not be itself
-				if ( block [ f_bval.model ] [ f_bval.spin ] [ x + 1 ] [ y ] == 0 ) {				
-					if ( board [ f_bval.ver + x + 1 ] [ f_bval.hor + y ] == 0 ) 
+				if ( block [ f_playBlock.model ] [ f_playBlock.spin ] [ x + 1 ] [ y ] == 0 ) {				
+					if ( board [ f_playBlock.ver + x + 1 ] [ f_playBlock.hor + y ] == 0 ) 
 						count++ ;
 				}
 			}
@@ -444,15 +460,16 @@ int CountBlank ( block_info f_bval ) {
 // The function is used to count the number of blocks that exist on the line when the block collides
 // Returns the number of blocks in the line
 // Use the information of the block as a parameter
-int Complete_Line ( block_info f_bval ) {															
+int HowManyBlockInLine ( blockInfo f_playBlock ) 
+{															
 	int x, y, c, count = 0;
 	
-	f_bval.ver-- ;
+	f_playBlock.ver-- ;
 	for ( x = 0; x < 4; x++ ) {
 		for ( y = 0; y < 4; y++ ) {
-			if ( block [ f_bval.model ] [ f_bval.spin ] [ x ] [ y ] != 0 ) {
+			if ( block [ f_playBlock.model ] [ f_playBlock.spin ] [ x ] [ y ] != 0 ) {
 				for ( c = 1; c < 11; c++ ) {
-					if ( board [ f_bval.ver + x ] [ c ] > 1 ) 
+					if ( board [ f_playBlock.ver + x ] [ c ] > 1 ) 
 						count++ ;
 				}
 				break ;
@@ -466,45 +483,62 @@ int Complete_Line ( block_info f_bval ) {
 // This function is used to compute each condition and obtain the block at the optimal position
 // Returns the best position to place a block
 // There is no parameter
-block_info Simul_Block ( void ) {
-	block_info test = { bval.model, 0, 0, 0, 2 }, max = { bval.model, 0, 0, 0, 2 } ;
-	double top_score = 0 , cur_score = 0 ;
+blockInfo ComputeoptimalBlock ( void ) 
+{
+	blockInfo currentBlock = { playBlock.model, 0, 0, 0, 2 }, optimalBlock = { playBlock.model, 0, 0, 0, 2 } ;
+	double optimalValue = 0 , currentValue = 0 ;
 	
 	// The number of all cases in which the current block can be rotated
-	for ( test.spin = 0; test.spin < 4; test.spin++ ) {									
+	for ( currentBlock.spin = 0; currentBlock.spin < 4; currentBlock.spin++ ) {									
 		// The number of all horizontal cases in which the current block can be placed
-		for ( test.hor = 0; test.hor < 10; test.hor++ ) {										
-			test.ver = 1 ;
+		for ( currentBlock.hor = 0; currentBlock.hor < 10; currentBlock.hor++ ) {										
+			currentBlock.ver = 1 ;
 			// If a block collides as soon as it starts
 			// computes the next block
-			if ( CollisionBlock ( test ) == 1 )  
+			if ( CollisionBlock ( currentBlock ) == 1 )  
 				continue ;										
-			while ( CollisionBlock ( test ) != 1 ) 
+			while ( CollisionBlock ( currentBlock ) != 1 ) 
 				// Until a block crashes
-				test.ver++ ;	
+				currentBlock.ver++ ;	
 				
-			cur_score = 1.2 * test.ver 
-						+ 5.2 * CountAroundBlock ( test ) 
-						- 12.1 * CountBlank ( test ) 
-						+ 5.4 * CountBottom ( test )
-						+ 5.3 * CountSide ( test )
-						+ 0.43 * Complete_Line ( test ) ;										
+			currentValue = 1.2 * currentBlock.ver 
+						+ 5.2 * CountAroundBlock ( currentBlock ) 
+						- 12.1 * CountBlank ( currentBlock ) 
+						+ 5.4 * CountBottom ( currentBlock )
+						+ 5.3 * CountSide ( currentBlock )
+						+ 0.43 * HowManyBlockInLine ( currentBlock ) ;										
 				
-			if ( top_score < cur_score ) {														
-				max = test ;
-				top_score = cur_score ;
+			if ( optimalValue < currentValue ) {														
+				optimalBlock = currentBlock ;
+				optimalValue = currentValue ;
 			}
 		}
 	}
-	return max ;
+	return optimalBlock ;
 }
 
 
-void Memory_Free ( void ) {
-	int a ;
+
+void MemoryFree ( void ) 
+{
+	int index ;
 	
-	for ( a = 10; a >= 0; a-- ) 
-		free ( image [ a ] ) ;
+	for ( index = 10; index >= 0; index-- ) 
+		free ( image [ index ] ) ;
+}
+
+
+void DisplayScore ( void )
+{
+	outtextxy ( image_x + 150, image_y + 470, "Games" ) ;
+	outtextxy ( image_x + 150, image_y + 490, score [ 0 ] ) ;
+		
+	outtextxy ( image_x + 150, image_y + 515, "Score" ) ;
+	outtextxy ( image_x + 150, image_y + 535, score [ 1 ] ) ;
+		
+	outtextxy ( image_x + 150, image_y + 560, "Top" ) ;
+	outtextxy ( image_x + 150, image_y + 580, score [ 2 ] ) ;
+
 }	
 
 
@@ -516,25 +550,25 @@ int main ( ) {
 	int page = 0, apage, vpage;
 	
 	sprintf ( score [ 0 ], "%d", game + 1 ) ;
-	sprintf ( score [ 1 ], "%d", is_score ) ;
-	sprintf ( score [ 2 ], "%d", target_score ) ;
+	sprintf ( score [ 1 ], "%d", isScore ) ;
+	sprintf ( score [ 2 ], "%d", topScore ) ;
 	
 	srand ( GetTickCount ( ) ) ;
 		
-	block_info ai ;
+	blockInfo currentBlock ;
 	
-	initwindow ( 1600, 900, "Tetris" ) ; 
+	initwindow ( TETRIS_WIDTH, TETRIS_HEIGHT, "Tetris" ) ; 
 	
 	LoadImage ( ) ;
 	
 	InitBoard ( ) ; 
 	
-	bval.model = rand ( ) % 7 ;
-	bval.next_model = rand ( ) % 7 ;
-	
+	playBlock.model = rand ( ) % 7 ;
+	playBlock.next_model = rand ( ) % 7 ;
 	
 	while ( 1 ) {
 		
+		// Double buffering
 		setactivepage ( page ) ;
 		setvisualpage ( 1 - page ) ;
 		
@@ -549,15 +583,15 @@ int main ( ) {
 		
 		RemoveAfterImage ( ) ;
 		
-		if ( bval.ver == 0 ) {
-			ai = Simul_Block ( ) ;    
-			bval.hor = ai.hor ;
-			bval.spin = ai.spin ;
+		if ( playBlock.ver == 0 ) {
+			currentBlock = ComputeoptimalBlock ( ) ;    
+			playBlock.hor = currentBlock.hor ;
+			playBlock.spin = currentBlock.spin ;
 		}
 		
-		bval.ver++ ;
+		playBlock.ver++ ;
 		
-		if ( CollisionBlock ( bval ) == 1 ) {
+		if ( CollisionBlock ( playBlock ) == 1 ) {
 			
 			SaveBlock ( ) ;
 			
@@ -565,47 +599,41 @@ int main ( ) {
 			
 			ClearLine ( ) ;
 			
-			sprintf ( score [ 1 ], "%d", is_score ) ;
+			sprintf ( score [ 1 ], "%d", isScore ) ;
 			
-			if ( target_score < is_score ) {
-				target_score = is_score ;
-				sprintf ( score [ 2 ], "%d", target_score ) ;
+			if ( topScore < isScore ) {
+				topScore = isScore ;
+				sprintf ( score [ 2 ], "%d", topScore ) ;
 			}
 			
-			if ( bval.ver < 2 ) {
+			// When the game is over
+			if ( playBlock.ver < 2 ) {
 				InitBoard ( ) ;
 				game++ ;
 				sprintf ( score [ 0 ], "%d", game + 1 ) ;
-				is_score = 0;
+				isScore = 0;
 				sprintf ( score [ 1 ], "%d", 0 ) ;
 			}
 			
 			ClearNextBlock ( ) ;
-			bval.ver = 0 ;
-			bval.hor = 4 ;
-			bval.model = bval.next_model ;
-			bval.next_model = rand ( ) % 7 ;
-			bval.spin = 0 ;
+			playBlock.ver = 0 ;
+			playBlock.hor = 4 ;
+			playBlock.model = playBlock.next_model ;
+			playBlock.next_model = rand ( ) % 7 ;
+			playBlock.spin = 0 ;
 			DrawNextBlock ( ) ;
 		}
 		
 		DrawCurrentBlock ( ) ;
 		
-		outtextxy ( image_x + 150, image_y + 470, "Games" ) ;
-		outtextxy ( image_x + 150, image_y + 490, score [ 0 ] ) ;
-		
-		outtextxy ( image_x + 150, image_y + 515, "Score" ) ;
-		outtextxy ( image_x + 150, image_y + 535, score [ 1 ] ) ;
-		
-		outtextxy ( image_x + 150, image_y + 560, "Top" ) ;
-		outtextxy ( image_x + 150, image_y + 580, score [ 2 ] ) ;
+		DisplayScore ( ) ;
 		
 		page = 1 - page ;
 		
 		delay ( 1 ) ;
 	}
 	
-	Memory_Free ( ) ;
+	MemoryFree ( ) ;
 	
 	closegraph ( ) ;
 	
