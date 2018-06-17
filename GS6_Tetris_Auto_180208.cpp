@@ -518,7 +518,9 @@ blockInfo ComputeoptimalBlock ( void )
 }
 
 
-
+// This function is used to free memory allocated to the image
+// There is no return value
+// There is no parameter
 void MemoryFree ( void ) 
 {
 	int index ;
@@ -528,17 +530,21 @@ void MemoryFree ( void )
 }
 
 
+// This function is used to display scores
+// There is no return value
+// There is no parameter
 void DisplayScore ( void )
 {
-	outtextxy ( image_x + 150, image_y + 470, "Games" ) ;
-	outtextxy ( image_x + 150, image_y + 490, score [ 0 ] ) ;
+	const int xCorrectionValue = 150, yCorrectionValue = 470 ;
+	
+	outtextxy ( image_x + xCorrectionValue, image_y + yCorrectionValue, "Games" ) ;
+	outtextxy ( image_x + xCorrectionValue, image_y + yCorrectionValue + 20, score [ 0 ] ) ;
 		
-	outtextxy ( image_x + 150, image_y + 515, "Score" ) ;
-	outtextxy ( image_x + 150, image_y + 535, score [ 1 ] ) ;
+	outtextxy ( image_x + xCorrectionValue, image_y + yCorrectionValue + 45, "Score" ) ;
+	outtextxy ( image_x + xCorrectionValue, image_y + yCorrectionValue + 65, score [ 1 ] ) ;
 		
-	outtextxy ( image_x + 150, image_y + 560, "Top" ) ;
-	outtextxy ( image_x + 150, image_y + 580, score [ 2 ] ) ;
-
+	outtextxy ( image_x + xCorrectionValue, image_y + yCorrectionValue + 90, "Top" ) ;
+	outtextxy ( image_x + xCorrectionValue, image_y + yCorrectionValue + 110, score [ 2 ] ) ;
 }	
 
 
