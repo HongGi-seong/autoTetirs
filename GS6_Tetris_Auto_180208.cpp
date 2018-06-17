@@ -459,29 +459,38 @@ int Complete_Line ( block_info f_bval ) {
 			}
 		}
 	}
-
 	return count ;
 }
 
+
+// This function is used to compute each condition and obtain the block at the optimal position
+// Returns the best position to place a block
+// There is no parameter
 block_info Simul_Block ( void ) {
 	block_info test = { bval.model, 0, 0, 0, 2 }, max = { bval.model, 0, 0, 0, 2 } ;
 	double top_score = 0 , cur_score = 0 ;
 	
-	for ( test.spin = 0; test.spin < 4; test.spin++ ) {											// 검사할 블록의 회전 경우의 수
-		for ( test.hor = 0; test.hor < 10; test.hor++ ) {										// 검사할 블록의 가로 범위
+	// The number of all cases in which the current block can be rotated
+	for ( test.spin = 0; test.spin < 4; test.spin++ ) {									
+		// The number of all horizontal cases in which the current block can be placed
+		for ( test.hor = 0; test.hor < 10; test.hor++ ) {										
 			test.ver = 1 ;
+			// If a block collides as soon as it starts
+			// computes the next block
 			if ( CollisionBlock ( test ) == 1 )  
-				continue ;										// 시작하자마자 블록이 충돌하면 다음 순서의 블록을 확인
+				continue ;										
 			while ( CollisionBlock ( test ) != 1 ) 
-				test.ver++ ;									// 검사할 블록을 멈출 때 까지 내림
+				// Until a block crashes
+				test.ver++ ;	
+				
 			cur_score = 1.2 * test.ver 
 						+ 5.2 * CountAroundBlock ( test ) 
 						- 12.1 * CountBlank ( test ) 
 						+ 5.4 * CountBottom ( test )
 						+ 5.3 * CountSide ( test )
-						+ 0.43 * Complete_Line ( test ) ;										// 블록이 도착했을 때 최적화 점수 값 계산
+						+ 0.43 * Complete_Line ( test ) ;										
 				
-			if ( top_score < cur_score ) {														// 최적화 점수 값이 최고로 높은 값을 max에 입력
+			if ( top_score < cur_score ) {														
 				max = test ;
 				top_score = cur_score ;
 			}
